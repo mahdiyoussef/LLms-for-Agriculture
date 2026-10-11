@@ -1,0 +1,54 @@
+{
+  "kind": "static-baseline",
+  "config_hash": "68c6156c87fa0117",
+  "corpus": {
+    "num_pdfs": 48,
+    "by_category": {
+      "01_core_water_agriculture": 9,
+      "02_precision_agriculture_tech": 11,
+      "03_irrigation_systems": 8,
+      "04_water_resources_environment": 7,
+      "05_rainfed_smallscale": 3,
+      "06_specific_sectors": 3,
+      "07_policy_strategy": 7
+    },
+    "primary_kb_md": 3591
+  },
+  "gold": {
+    "total": 106,
+    "dev": 79,
+    "test": 27,
+    "by_language": {
+      "en": 72,
+      "fr": 12,
+      "ar": 10,
+      "darija_latn": 8,
+      "darija_arab": 4
+    },
+    "by_intent": {
+      "factual": 58,
+      "procedural": 5,
+      "numeric": 12,
+      "comparative": 4,
+      "relational": 4,
+      "unanswerable": 6,
+      "adversarial": 8,
+      "summary": 2,
+      "reasoning": 7
+    },
+    "answerable": 92,
+    "unanswerable": 14
+  },
+  "truncation": {
+    "num_ctx": 4096,
+    "worst_case_est_tokens": 4750,
+    "median_case_est_tokens": 1650,
+    "worst_case_silent_truncation_likely": true,
+    "note": "chars/4 heuristic; tokenizer-based budgeter is P1.7"
+  },
+  "coverage_gaps": [
+    "chunk-level 0/1/2 relevance labels: not yet collected (needs retrieval run)",
+    "human review + kappa: pending (P0.2 remainder)",
+    "runtime metrics (latency/VRAM/Recall/nDCG): need target HW + deps"
+  ]
+}

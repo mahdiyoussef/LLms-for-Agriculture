@@ -1,0 +1,7 @@
+{
+  "embedding_model": "distiluse-base-multilingual-cased-v2",
+  "embedding_dimension": 512,
+  "chunker_version": "recursive-600-90+v1",
+  "parser_version": "pdfplumber+pypdf-fallback+v1",
+  "corpus_hash": "44cddd917dbdde42"
+}

@@ -1,0 +1,122 @@
+[
+  {
+    "id": "v1-033",
+    "answer": "Drip irrigation delivers water to the root zone with 90-95% efficiency. [Source: Water_Management_Guidebook-EN.pdf] Needs 69 m3/ha for 6.9 mm.",
+    "retrieved_ids": [
+      "Water_Management_Guidebook-EN.pdf",
+      "abc123"
+    ],
+    "evidence_texts": [
+      "Drip irrigation efficiency 90-95%. ETc = Kc x ET0. 6.9 mm = 69 m3/ha."
+    ],
+    "relevant_ids": [
+      "Water_Management_Guidebook-EN.pdf"
+    ],
+    "graded_relevance": {
+      "Water_Management_Guidebook-EN.pdf": 2,
+      "abc123": 0
+    },
+    "latency_ms": 1200,
+    "abstained": false
+  },
+  {
+    "id": "legacy-045",
+    "answer": "Drip irrigation delivers water to the root zone with 90-95% efficiency. [Source: Water_Management_Guidebook-EN.pdf] Needs 69 m3/ha for 6.9 mm.",
+    "retrieved_ids": [
+      "Water_Management_Guidebook-EN.pdf",
+      "abc123"
+    ],
+    "evidence_texts": [
+      "Drip irrigation efficiency 90-95%. ETc = Kc x ET0. 6.9 mm = 69 m3/ha."
+    ],
+    "relevant_ids": [
+      "Water_Management_Guidebook-EN.pdf"
+    ],
+    "graded_relevance": {
+      "Water_Management_Guidebook-EN.pdf": 2,
+      "abc123": 0
+    },
+    "latency_ms": 1200,
+    "abstained": false
+  },
+  {
+    "id": "v1-011",
+    "answer": "Drip irrigation delivers water to the root zone with 90-95% efficiency. [Source: Water_Management_Guidebook-EN.pdf] Needs 69 m3/ha for 6.9 mm.",
+    "retrieved_ids": [
+      "Water_Management_Guidebook-EN.pdf",
+      "abc123"
+    ],
+    "evidence_texts": [
+      "Drip irrigation efficiency 90-95%. ETc = Kc x ET0. 6.9 mm = 69 m3/ha."
+    ],
+    "relevant_ids": [
+      "Water_Management_Guidebook-EN.pdf"
+    ],
+    "graded_relevance": {
+      "Water_Management_Guidebook-EN.pdf": 2,
+      "abc123": 0
+    },
+    "latency_ms": 1200,
+    "abstained": false
+  },
+  {
+    "id": "legacy-049",
+    "answer": "Drip irrigation delivers water to the root zone with 90-95% efficiency. [Source: Water_Management_Guidebook-EN.pdf] Needs 69 m3/ha for 6.9 mm.",
+    "retrieved_ids": [
+      "Water_Management_Guidebook-EN.pdf",
+      "abc123"
+    ],
+    "evidence_texts": [
+      "Drip irrigation efficiency 90-95%. ETc = Kc x ET0. 6.9 mm = 69 m3/ha."
+    ],
+    "relevant_ids": [
+      "Water_Management_Guidebook-EN.pdf"
+    ],
+    "graded_relevance": {
+      "Water_Management_Guidebook-EN.pdf": 2,
+      "abc123": 0
+    },
+    "latency_ms": 1200,
+    "abstained": false
+  },
+  {
+    "id": "v1-044",
+    "answer": "Drip irrigation delivers water to the root zone with 90-95% efficiency. [Source: Water_Management_Guidebook-EN.pdf] Needs 69 m3/ha for 6.9 mm.",
+    "retrieved_ids": [
+      "Water_Management_Guidebook-EN.pdf",
+      "abc123"
+    ],
+    "evidence_texts": [
+      "Drip irrigation efficiency 90-95%. ETc = Kc x ET0. 6.9 mm = 69 m3/ha."
+    ],
+    "relevant_ids": [
+      "Water_Management_Guidebook-EN.pdf"
+    ],
+    "graded_relevance": {
+      "Water_Management_Guidebook-EN.pdf": 2,
+      "abc123": 0
+    },
+    "latency_ms": 1200,
+    "abstained": false
+  },
+  {
+    "id": "v1-031",
+    "answer": "Drip irrigation delivers water to the root zone with 90-95% efficiency. [Source: Water_Management_Guidebook-EN.pdf] Needs 69 m3/ha for 6.9 mm.",
+    "retrieved_ids": [
+      "Water_Management_Guidebook-EN.pdf",
+      "abc123"
+    ],
+    "evidence_texts": [
+      "Drip irrigation efficiency 90-95%. ETc = Kc x ET0. 6.9 mm = 69 m3/ha."
+    ],
+    "relevant_ids": [
+      "Water_Management_Guidebook-EN.pdf"
+    ],
+    "graded_relevance": {
+      "Water_Management_Guidebook-EN.pdf": 2,
+      "abc123": 0
+    },
+    "latency_ms": 1200,
+    "abstained": false
+  }
+]

@@ -1,0 +1,113 @@
+{
+  "kind": "run-report",
+  "report": {
+    "kind": "run-report",
+    "split": "dev",
+    "n_scored": 6,
+    "overall": {
+      "proxy_nugget_coverage": {
+        "mean": 0.08333333333333333,
+        "lo": 0.0,
+        "hi": 0.25
+      },
+      "proxy_lang_fidelity": {
+        "mean": 0.6666666666666666,
+        "lo": 0.3333333333333333,
+        "hi": 1.0
+      },
+      "citation_precision": {
+        "mean": 1.0,
+        "lo": 1.0,
+        "hi": 1.0
+      },
+      "citation_recall": {
+        "mean": 0.5,
+        "lo": 0.5,
+        "hi": 0.5
+      },
+      "numeric_supported_rate": {
+        "mean": 1.0,
+        "lo": 1.0,
+        "hi": 1.0
+      },
+      "recall_at_5": {
+        "mean": 1.0,
+        "lo": 1.0,
+        "hi": 1.0
+      },
+      "recall_at_10": {
+        "mean": 1.0,
+        "lo": 1.0,
+        "hi": 1.0
+      },
+      "mrr": {
+        "mean": 1.0,
+        "lo": 1.0,
+        "hi": 1.0
+      }
+    },
+    "slices": {
+      "language=darija_arab": {
+        "n": 2,
+        "proxy_nugget_coverage": {
+          "mean": 0.0,
+          "lo": 0.0,
+          "hi": 0.0
+        }
+      },
+      "language=en": {
+        "n": 3,
+        "proxy_nugget_coverage": {
+          "mean": 0.16666666666666666,
+          "lo": 0.0,
+          "hi": 0.5
+        }
+      },
+      "language=fr": {
+        "n": 1,
+        "proxy_nugget_coverage": {
+          "mean": 0.0,
+          "lo": 0.0,
+          "hi": 0.0
+        }
+      },
+      "intent=factual": {
+        "n": 3,
+        "proxy_nugget_coverage": {
+          "mean": 0.16666666666666666,
+          "lo": 0.0,
+          "hi": 0.5
+        }
+      },
+      "intent=numeric": {
+        "n": 1,
+        "proxy_nugget_coverage": {
+          "mean": 0.0,
+          "lo": 0.0,
+          "hi": 0.0
+        }
+      },
+      "intent=reasoning": {
+        "n": 1,
+        "proxy_nugget_coverage": {
+          "mean": 0.0,
+          "lo": 0.0,
+          "hi": 0.0
+        }
+      },
+      "intent=unanswerable": {
+        "n": 1,
+        "proxy_nugget_coverage": {
+          "mean": 0.0,
+          "lo": 0.0,
+          "hi": 0.0
+        }
+      }
+    },
+    "efficiency": {
+      "n": 6,
+      "p50_ms": 1200,
+      "p95_ms": 1200
+    }
+  }
+}
