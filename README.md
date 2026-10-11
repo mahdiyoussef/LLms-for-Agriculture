@@ -2,6 +2,13 @@
 
 A domain-focused retrieval and reasoning platform for agricultural knowledge, irrigation planning, and water-resource decision support.
 
+## Social preview
+
+Use [`docs/social-preview.png`](docs/social-preview.png) as the GitHub repository
+social preview image. It is 1280x640px and represents the platform's RAG
+pipeline, specialist agriculture agents, LLM providers, persistent memory, and
+secure AWS deployment.
+
 ## Overview
 
 This project builds a retrieval-augmented generation pipeline for precision agriculture and water management. It processes technical documents, indexes domain knowledge, and answers agriculture-related questions with source-aware retrieval and reasoning.
