@@ -1,111 +1,222 @@
 # Precision Agriculture Water Management RAG System
 
-<div align="center">
-
-![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python)
-![LangChain](https://img.shields.io/badge/LangChain-0.1+-green)
-![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector%20Store-orange)
-![Ollama](https://img.shields.io/badge/Ollama-LLM-purple)
-![License](https://img.shields.io/badge/License-MIT-yellow)
-
-**An advanced Graph-Based Agentic RAG (GA-RAG) system for precision agriculture and water management, featuring semantic chunking, hybrid retrieval, knowledge graphs, and LLM-as-Judge evaluation.**
-
-[Features](#features) • [Architecture](#architecture) • [Installation](#installation) • [Usage](#usage) • [API Reference](#api-reference) • [Concepts](#core-concepts--techniques)
-
-</div>
-
----
-
-## Table of Contents
-
-1. [Overview](#-overview)
-2. [Features](#-features)
-3. [Architecture](#-architecture)
-4. [Installation](#-installation)
-5. [Usage](#-usage)
-6. [Core Concepts & Techniques](#-core-concepts--techniques)
-   - [Document Processing](#1-document-processing)
-   - [Semantic Chunking](#2-semantic-chunking)
-   - [Embedding Generation](#3-embedding-generation)
-   - [Vector Store](#4-vector-store)
-   - [Hybrid Retrieval](#5-hybrid-retrieval)
-   - [Query Enhancement](#6-query-enhancement)
-   - [Cross-Encoder Reranking](#7-cross-encoder-reranking)
-   - [Query Routing](#8-query-routing)
-   - [Knowledge Graph](#9-knowledge-graph)
-   - [RAG Chain & Generation](#10-rag-chain--generation)
-   - [ReAct Orchestration](#11-react-orchestration)
-   - [Graph-Based Agentic RAG](#12-graph-based-agentic-rag-ga-rag)
-   - [LLM-as-Judge Evaluation](#13-llm-as-judge-evaluation)
-   - [Mathematical Foundations](#14-mathematical-foundations)
-7. [API Reference](#-api-reference)
-8. [Configuration](#-configuration)
-9. [Testing](#-testing)
-10. [Contributing](#-contributing)
-
----
+A domain-focused retrieval and reasoning platform for agricultural knowledge, irrigation planning, and water-resource decision support.
 
 ## Overview
 
-This system is a comprehensive **Retrieval-Augmented Generation (RAG)** pipeline specifically designed for **precision agriculture** and **water management** domains. It processes technical documents (PDFs), extracts knowledge, and provides accurate, citation-backed answers to agricultural queries.
+This project builds a retrieval-augmented generation pipeline for precision agriculture and water management. It processes technical documents, indexes domain knowledge, and answers agriculture-related questions with source-aware retrieval and reasoning.
 
-### Key Differentiators
+## Project Structure
 
-- **Domain-Specific**: Tailored for irrigation, soil moisture, crop management, and water conservation
-- **Morocco-Focused**: Special support for Moroccan regions, water basins, and local agricultural contexts
-- **Multi-Modal Retrieval**: Combines semantic search, keyword matching, and knowledge graph traversal
-- **Agentic Architecture**: Autonomous query decomposition and iterative refinement
-- **Mathematically Grounded**: Implements research-backed metrics for chunking quality and retrieval evaluation
+```text
+src/
+  adapters/          API and CLI adapters
+  agents/            domain agent implementations
+  application/       application services and orchestration
+  config/            runtime configuration and logging
+  core/              domain entities, protocols, and exceptions
+  document_processing/ document ingestion and semantic chunking
+  embeddings/        embedding generation and vector stores
+  generation/        generation and memory orchestration
+  infrastructure/    external service integration, weather, persistence
+  knowledge_graph/   knowledge-graph construction and traversal
+  retrieval/         hybrid retrieval, routing, reranking, enhancement
+  utils/             utility modules and evaluation helpers
 
-### System Specifications
+tests/
+  test_core.py       core regression tests
 
-| Component | Technology |
-|-----------|------------|
-| **LLM** | Llama 3.2 3B via Ollama |
-| **Embeddings** | all-MiniLM-L6-v2 (384 dims) |
-| **Vector Store** | ChromaDB (HNSW indexing) |
-| **Knowledge Graph** | NetworkX |
-| **API** | FastAPI with Swagger |
-| **Optimized For** | i5-10300H, 16GB RAM, GTX 1650 (4GB VRAM) |
+src/evaluation_data/
+  evaluation gold set, seed dataset builder, and review notes
+```
 
----
+## Core Capabilities
+
+- Domain-specific retrieval for irrigation, crop management, and water-use planning
+- Hybrid retrieval combining semantic matching and keyword-based search
+- Knowledge-graph traversal for relational agricultural questions
+- Semantic document chunking and metadata-aware indexing
+- Weather-aware context enrichment for agronomic decision support
+- Evaluation modules for answer quality and agentic workflows
+
+## Secure API
+
+The supported HTTP entry point is `src.api.app:app`.
+
+```bash
+cp .env.example .env
+# Set API_ADMIN_PASSWORD and a random JWT_SECRET of at least 32 characters.
+uvicorn src.api.app:app --host 0.0.0.0 --port 8000
+```
+
+The API provides:
+
+- `POST /auth/token` for short-lived JWT access tokens
+- `POST /query` for authenticated RAG requests
+- `POST /web/search` for bounded public web search
+- `GET /mcp/{server_index}/tools` for allowlisted MCP server discovery
+- `GET /health` for liveness
+
+The API applies prompt-injection checks, request-size limits, credential redaction,
+HTTPS/localhost restrictions for MCP endpoints, and explicit CORS configuration.
+For production, use a managed secret store, HTTPS behind an ALB or reverse proxy,
+and AWS Bedrock Guardrails in front of model responses.
+
+## Deployment
+
+- `Dockerfile` and `docker-compose.yml` provide a non-root, read-only container baseline.
+- `.github/workflows/ci-cd.yml` runs tests, audits dependencies, publishes to Amazon ECR,
+  and deploys to EC2 through AWS Systems Manager.
+- `infra/terraform` provisions the EC2 instance, HTTPS Application Load Balancer, ECR,
+  WAF, CloudWatch alarms, IAM roles, OIDC deployment trust, and Bedrock permissions.
+
+The CI/CD workflow uses AWS OIDC, so configure `AWS_DEPLOY_ROLE_ARN` and
+`EC2_INSTANCE_ID`. Terraform does not create application
+secrets; provision `/opt/agriculture-rag/.env` through SSM or Secrets Manager.
+
+Terraform deployment instructions, state bootstrap, SSM configuration, and GitHub
+environment setup are documented in [infra/terraform/README.md](infra/terraform/README.md).
+
+## Security references
+
+The implementation follows the security guidance from:
+
+- [FastAPI OAuth2 and JWT documentation](https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/)
+- [AWS Bedrock Converse API](https://docs.aws.amazon.com/bedrock/latest/userguide/conversation-inference.html)
+- [AWS Bedrock Guardrails](https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html)
+- [Model Context Protocol authorization](https://modelcontextprotocol.io/specification/latest/basic/authorization)
+- [OWASP GenAI Security Project](https://genai.owasp.org/)
 
 ## Features
 
-### Document Processing
-- ✅ PDF extraction with table handling (pdfplumber + pypdf fallback)
-- ✅ Semantic chunking with topic boundary detection
-- ✅ Propositional decomposition (atomic fact extraction)
-- ✅ Morocco-specific metadata tagging (basins, regions)
+### Document processing
+- PDF extraction and fallback handling for common document pipelines
+- Semantic chunking and document segmentation
+- Region-aware and crop-aware metadata tagging
+- Operational support for agronomy source documents
 
 ### Retrieval
-- ✅ **Hybrid Search**: Semantic embeddings + BM25 keyword matching
-- ✅ **Multi-Query Generation**: LLM-generated query variations
-- ✅ **Cross-Encoder Reranking**: Precision re-scoring of candidates
-- ✅ **Smart Query Routing**: Intent-based retrieval strategy selection
-- ✅ **Sentence-Window Retrieval**: Fine-grained retrieval with context expansion
+- Hybrid search using semantic embeddings and BM25-style keyword matching
+- Intent-aware query routing
+- Query enhancement and reranking for higher precision
+- Sentence-window retrieval for tight source context
 
-### Knowledge Graph
-- ✅ Entity extraction (SpaCy NER + agricultural patterns)
-- ✅ Relationship extraction via co-occurrence and dependency parsing
-- ✅ Multi-hop graph traversal for relational queries
-- ✅ NetworkX-based in-memory graph storage
+### Knowledge graph
+- Entity extraction for agricultural concepts
+- Relationship traversal and contextual graph search
+- Support for multi-hop reasoning on knowledge relationships
 
-### Generation
-- ✅ Ollama integration (supports Llama 3, Qwen, Gemma, etc.)
-- ✅ Conversation memory with sliding window
-- ✅ Structured output with citations
-- ✅ Confidence scoring
+### Generation and orchestration
+- LLM integration for generation and decomposition
+- Iterative reasoning and multi-step retrieval loops
+- Structured answer generation with citations and confidence scoring
+- Weather and location-aware context injection
 
-### Advanced Features
-- ✅ **ReAct Orchestration**: Thought → Action → Observation → Critique loop
-- ✅ **GA-RAG Agent**: Query decomposition + tool selection + iterative synthesis
-- ✅ **LLM-as-Judge Evaluation**: Faithfulness, relevancy, and agricultural accuracy metrics
-- ✅ **FastAPI REST API** with Swagger documentation
+### Evaluation
+- LLM-as-a-judge style evaluation patterns
+- Agentic evaluation and calibration utilities
+- Golden-set dataset support for agronomy QA benchmarking
 
 ---
 
 ## Architecture
+
+### Proposed AWS Architecture
+
+The proposed production topology keeps the application host private, terminates TLS
+at the load balancer, and uses IAM roles instead of long-lived AWS access keys.
+
+```mermaid
+flowchart LR
+    User[Client applications] -->|HTTPS| WAF[AWS WAF]
+    WAF --> ALB[Application Load Balancer]
+    ALB --> EC2[Amazon EC2<br/>Dockerized FastAPI]
+    EC2 --> Bedrock[Amazon Bedrock<br/>Converse API]
+    EC2 --> Guardrails[Amazon Bedrock<br/>Guardrails]
+    EC2 --> SSM[AWS Systems Manager<br/>SecureString configuration]
+    EC2 --> ECR[Amazon ECR<br/>image pull]
+    EC2 --> MCP[Approved MCP servers]
+    EC2 --> Web[Public web-search provider]
+    EC2 --> CW[Amazon CloudWatch<br/>logs and alarms]
+
+    Developer[GitHub Actions] -->|OIDC| DeployRole[IAM deployment role]
+    DeployRole --> ECR
+    DeployRole --> SSM
+    DeployRole --> SSMRun[AWS Systems Manager<br/>Run Command]
+    SSMRun --> EC2
+
+    Terraform[Terraform] --> State[Amazon S3<br/>encrypted state]
+    Terraform --> AWS[AWS resources]
+    AWS --> ALB
+    AWS --> EC2
+    AWS --> Bedrock
+```
+
+### AWS service icon legend
+
+The icons below use the official AWS Architecture Icons asset paths. The complete
+icon set and usage guidance are available from the
+[AWS Architecture Icons](https://aws.amazon.com/architecture/icons/) page.
+
+| Service | Role | Icon |
+|---|---|---|
+| Amazon EC2 | Private compute host for the containerized API | <img src="https://raw.githubusercontent.com/weibeld/aws-icons-svg/main/q1-2022/Architecture-Service-Icons_01312022/Arch_Compute/48/Arch_Amazon-EC2_48.svg" alt="Amazon EC2" width="32"> |
+| Elastic Load Balancing | Public HTTPS entry point and TLS termination | <img src="https://raw.githubusercontent.com/weibeld/aws-icons-svg/main/q1-2022/Architecture-Service-Icons_01312022/Arch_Networking-Content-Delivery/48/Arch_Elastic-Load-Balancing_48.svg" alt="Elastic Load Balancing" width="32"> |
+| AWS WAF | Layer-7 rate limiting and request filtering | <img src="https://raw.githubusercontent.com/weibeld/aws-icons-svg/main/q1-2022/Architecture-Service-Icons_01312022/Arch_Security-Identity-Compliance/48/Arch_AWS-WAF_48.svg" alt="AWS WAF" width="32"> |
+| Amazon Bedrock | Foundation-model inference | [AWS service icon catalog](https://aws.amazon.com/architecture/icons/) |
+| Amazon ECR | Immutable container image storage and scanning | <img src="https://raw.githubusercontent.com/weibeld/aws-icons-svg/main/q1-2022/Architecture-Service-Icons_01312022/Arch_Containers/48/Arch_Amazon-Elastic-Container-Registry_48.svg" alt="Amazon ECR" width="32"> |
+| AWS Systems Manager | Secure deployment commands and configuration retrieval | <img src="https://raw.githubusercontent.com/weibeld/aws-icons-svg/main/q1-2022/Architecture-Service-Icons_01312022/Arch_Management-Governance/48/Arch_AWS-Systems-Manager_48.svg" alt="AWS Systems Manager" width="32"> |
+| Amazon CloudWatch | Application logs, metrics, and alarms | <img src="https://raw.githubusercontent.com/weibeld/aws-icons-svg/main/q1-2022/Architecture-Service-Icons_01312022/Arch_Management-Governance/48/Arch_Amazon-CloudWatch_48.svg" alt="Amazon CloudWatch" width="32"> |
+| Amazon S3 | Encrypted Terraform state with versioning and locking | <img src="https://raw.githubusercontent.com/weibeld/aws-icons-svg/main/q1-2022/Architecture-Service-Icons_01312022/Arch_Storage/48/Arch_Amazon-Simple-Storage-Service_48.svg" alt="Amazon S3" width="32"> |
+| AWS Identity and Access Management | EC2, OIDC, and least-privilege deployment roles | <img src="https://raw.githubusercontent.com/weibeld/aws-icons-svg/main/q1-2022/Architecture-Service-Icons_01312022/Arch_Security-Identity-Compliance/48/Arch_AWS-Identity-and-Access-Management_48.svg" alt="AWS IAM" width="32"> |
+
+### Request and deployment flows
+
+1. A client sends an HTTPS request to the public ALB.
+2. AWS WAF applies the edge rate limit before traffic reaches the application.
+3. The ALB terminates TLS and forwards traffic to the private EC2 target on port 8000.
+4. FastAPI validates JWT or OIDC claims and applies request-level guardrails.
+5. The provider layer calls either the local RAG pipeline or Bedrock Converse.
+6. Bedrock Guardrails filter model input and output when configured.
+7. MCP requests are limited to explicitly allowlisted servers and approved network
+   destinations.
+8. GitHub Actions authenticates through OIDC, pushes the image to ECR, and invokes
+   Systems Manager Run Command on the EC2 instance.
+9. The instance retrieves its encrypted environment payload from SSM and restarts
+   the container with a read-only filesystem.
+10. Logs and operational alarms are sent to CloudWatch.
+
+### Architecture boundaries
+
+- **Public boundary:** WAF and ALB only.
+- **Private application boundary:** EC2, container runtime, and internal target group.
+- **Model boundary:** Bedrock Converse and Bedrock Guardrails.
+- **Deployment boundary:** GitHub OIDC role and Systems Manager.
+- **State boundary:** Versioned, encrypted S3 Terraform state.
+- **Tool boundary:** Explicit MCP server allowlist and web-search adapter.
+
+## Code Documentation
+
+The implementation is organized into layers so the API, domain logic, providers, and
+infrastructure can be documented and tested independently.
+
+| Area | Primary files | Responsibility |
+|---|---|---|
+| API composition | [src/api/app.py](src/api/app.py), [src/api/models.py](src/api/models.py) | FastAPI application factory, routes, request and response schemas |
+| Authentication | [src/api/auth.py](src/api/auth.py), [src/api/settings.py](src/api/settings.py) | Local JWT issuance, OIDC JWT validation, configuration validation |
+| Guardrails | [src/api/guardrails.py](src/api/guardrails.py), [src/api/guardrails_policy.py](src/api/guardrails_policy.py) | Input validation, prompt-injection checks, secret redaction, policy defaults |
+| Providers | [src/api/providers.py](src/api/providers.py) | Provider-neutral generation interface for local RAG and Bedrock |
+| External tools | [src/api/mcp.py](src/api/mcp.py), [src/api/web_search.py](src/api/web_search.py) | Allowlisted MCP requests and bounded web search |
+| Domain layer | [src/core/](src/core/) | Entities, protocols, and domain exceptions |
+| Retrieval | [src/retrieval/](src/retrieval/) | Query routing, hybrid retrieval, reranking, and query enhancement |
+| Ingestion | [src/document_processing/](src/document_processing/) | PDF extraction, semantic chunking, and metadata preparation |
+| Deployment | [infra/terraform/](infra/terraform/), [.github/workflows/ci-cd.yml](.github/workflows/ci-cd.yml) | AWS resources, state bootstrap, CI/CD, image build, and deployment |
+
+All new production modules include module and public-function docstrings. The
+[tests/test_api_security.py](tests/test_api_security.py) file documents the expected
+security boundary through executable tests.
+
+### Application architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
