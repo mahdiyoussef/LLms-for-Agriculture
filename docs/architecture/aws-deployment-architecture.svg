@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" role="img" aria-labelledby="title desc">
+  <title id="title">AWS deployment architecture for Agriculture AI</title>
+  <desc id="desc">GitHub Actions publishes a container to Amazon ECR and deploys it with Systems Manager to a private EC2 instance. Public traffic passes through AWS WAF and an HTTPS Application Load Balancer. The application calls Bedrock, Guardrails, CloudWatch, and approved external tools.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L10,3 L0,6 Z" fill="#52606d"/></marker>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#102a43" flood-opacity=".16"/></filter>
+    <style>
+      .box { stroke-width: 2; rx: 14; filter: url(#shadow); }
+      .title { font: 700 26px Arial, sans-serif; fill: #102a43; }
+      .label { font: 700 16px Arial, sans-serif; fill: #102a43; }
+      .small { font: 14px Arial, sans-serif; fill: #334e68; }
+      .tiny { font: 12px Arial, sans-serif; fill: #486581; }
+      .edge { stroke: #52606d; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+      .dash { stroke: #829ab1; stroke-width: 2; stroke-dasharray: 8 7; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1600" height="980" fill="#f5f7fa"/>
+  <text x="55" y="55" class="title">AWS deployment architecture for Agriculture AI</text>
+  <text x="55" y="82" class="small">Private compute, managed model access, OIDC deployment, encrypted configuration, persistent bounded agent memory</text>
+
+  <rect x="30" y="125" width="1540" height="450" class="box" fill="#eef6ff" stroke="#7b8794"/>
+  <text x="55" y="160" class="label">AWS account and VPC</text>
+  <rect x="65" y="195" width="1450" height="330" class="box" fill="#fff" stroke="#bcccdc"/>
+  <text x="90" y="230" class="label">Public edge and private application subnet</text>
+
+  <rect x="105" y="280" width="160" height="155" class="box" fill="#fff3d6" stroke="#f2994a"/>
+  <image href="icons/waf.svg" x="160" y="295" width="48" height="48"/>
+  <text x="185" y="370" text-anchor="middle" class="label">AWS WAF</text>
+  <text x="185" y="395" text-anchor="middle" class="tiny">Rate limiting</text>
+  <text x="185" y="412" text-anchor="middle" class="tiny">Request filtering</text>
+
+  <rect x="345" y="280" width="190" height="155" class="box" fill="#e3fcef" stroke="#27ae60"/>
+  <image href="icons/alb.svg" x="416" y="295" width="48" height="48"/>
+  <text x="440" y="370" text-anchor="middle" class="label">HTTPS ALB</text>
+  <text x="440" y="395" text-anchor="middle" class="tiny">TLS termination</text>
+  <text x="440" y="412" text-anchor="middle" class="tiny">Health checks</text>
+
+  <rect x="625" y="255" width="345" height="205" class="box" fill="#fff" stroke="#2f80ed"/>
+  <image href="icons/ec2.svg" x="774" y="270" width="48" height="48"/>
+  <text x="797" y="345" text-anchor="middle" class="label">Private Amazon EC2</text>
+  <text x="797" y="370" text-anchor="middle" class="small">Dockerized FastAPI</text>
+  <text x="797" y="394" text-anchor="middle" class="small">Agriculture agents</text>
+  <text x="797" y="418" text-anchor="middle" class="small">Read-only root filesystem</text>
+  <text x="797" y="442" text-anchor="middle" class="tiny">Persistent agent-memory volume</text>
+
+  <rect x="1060" y="280" width="190" height="155" class="box" fill="#e8daef" stroke="#9b51e0"/>
+  <text x="1155" y="335" text-anchor="middle" class="label">Amazon Bedrock</text>
+  <text x="1155" y="362" text-anchor="middle" class="small">Converse API</text>
+  <text x="1155" y="388" text-anchor="middle" class="small">Foundation models</text>
+  <text x="1155" y="414" text-anchor="middle" class="tiny">Guardrails configured</text>
+
+  <rect x="1320" y="280" width="150" height="155" class="box" fill="#e3fcef" stroke="#27ae60"/>
+  <image href="icons/cloudwatch.svg" x="1370" y="295" width="48" height="48"/>
+  <text x="1395" y="370" text-anchor="middle" class="label">CloudWatch</text>
+  <text x="1395" y="395" text-anchor="middle" class="tiny">Logs and alarms</text>
+
+  <path d="M265 357 H345" class="edge"/><path d="M535 357 H625" class="edge"/><path d="M970 357 H1060" class="edge"/><path d="M970 400 H1320" class="dash"/>
+
+  <rect x="105" y="675" width="250" height="175" class="box" fill="#fff" stroke="#829ab1"/>
+  <text x="230" y="715" text-anchor="middle" class="label">GitHub Actions</text>
+  <text x="230" y="745" text-anchor="middle" class="small">Tests and image build</text>
+  <text x="230" y="770" text-anchor="middle" class="small">OIDC authentication</text>
+  <text x="230" y="795" text-anchor="middle" class="tiny">No long-lived AWS keys</text>
+
+  <rect x="435" y="675" width="200" height="175" class="box" fill="#fff3d6" stroke="#f2994a"/>
+  <image href="icons/ecr.svg" x="511" y="695" width="48" height="48"/>
+  <text x="535" y="770" text-anchor="middle" class="label">Amazon ECR</text>
+  <text x="535" y="798" text-anchor="middle" class="tiny">Immutable image tags</text>
+  <text x="535" y="817" text-anchor="middle" class="tiny">Scan on push</text>
+
+  <rect x="715" y="675" width="220" height="175" class="box" fill="#e3fcef" stroke="#27ae60"/>
+  <image href="icons/ssm.svg" x="801" y="695" width="48" height="48"/>
+  <text x="825" y="770" text-anchor="middle" class="label">Systems Manager</text>
+  <text x="825" y="798" text-anchor="middle" class="tiny">Run Command</text>
+  <text x="825" y="817" text-anchor="middle" class="tiny">SecureString config</text>
+
+  <rect x="1015" y="675" width="200" height="175" class="box" fill="#d9eaf7" stroke="#2f80ed"/>
+  <image href="icons/s3.svg" x="1091" y="695" width="48" height="48"/>
+  <text x="1115" y="770" text-anchor="middle" class="label">Amazon S3</text>
+  <text x="1115" y="798" text-anchor="middle" class="tiny">Encrypted Terraform state</text>
+  <text x="1115" y="817" text-anchor="middle" class="tiny">Versioning and locking</text>
+
+  <rect x="1295" y="675" width="200" height="175" class="box" fill="#e8daef" stroke="#9b51e0"/>
+  <image href="icons/iam.svg" x="1371" y="695" width="48" height="48"/>
+  <text x="1395" y="770" text-anchor="middle" class="label">AWS IAM</text>
+  <text x="1395" y="798" text-anchor="middle" class="tiny">EC2 and OIDC roles</text>
+  <text x="1395" y="817" text-anchor="middle" class="tiny">Least privilege</text>
+
+  <path d="M355 755 H435" class="edge"/><path d="M635 755 H715" class="edge"/><path d="M825 675 V460" class="dash"/><path d="M1215 755 H1295" class="dash"/><path d="M1115 675 V575" class="dash"/>
+  <text x="55" y="920" class="tiny">Solid arrows: runtime or deployment flow. Dashed arrows: control-plane, observability, or authorization relationship.</text>
+  <text x="55" y="945" class="tiny">AWS service icons are checked-in assets from the AWS Architecture Icons repository snapshot documented in README.md.</text>
+</svg>

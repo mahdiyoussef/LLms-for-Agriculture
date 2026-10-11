@@ -180,6 +180,24 @@ The implementation follows the security guidance from:
 
 ## Architecture
 
+### Application architecture image
+
+The checked-in image below shows the complete request path through the FastAPI
+boundary, agent orchestrator, agriculture specialists, RAG evidence, LLM
+providers, deterministic services, scoped memory, and approved tools.
+
+[![Agriculture AI application architecture](docs/architecture/application-architecture.svg)](docs/architecture/application-architecture.svg)
+
+### AWS deployment architecture image
+
+The deployment image shows the production flow through AWS WAF, the HTTPS
+Application Load Balancer, private EC2, Amazon Bedrock, ECR, Systems Manager,
+CloudWatch, S3 Terraform state, IAM, and GitHub Actions OIDC. AWS service icons
+are checked into [`docs/architecture/icons/`](docs/architecture/icons/) so the
+diagram does not depend on external image URLs at render time.
+
+[![AWS deployment architecture](docs/architecture/aws-deployment-architecture.svg)](docs/architecture/aws-deployment-architecture.svg)
+
 ### Proposed AWS Architecture
 
 The proposed production topology keeps the application host private, terminates TLS
