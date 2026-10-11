@@ -1,0 +1,93 @@
+name: CI/CD
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python -m compileall -q src
+      - run: pip install pip-audit
+      - run: pip-audit -r requirements.txt
+      - run: pytest tests/test_core.py tests/test_api_security.py -q
+
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform -chdir=infra/terraform fmt -check -recursive
+      - run: terraform -chdir=infra/terraform init -backend=false
+      - run: terraform -chdir=infra/terraform validate
+      - run: terraform -chdir=infra/terraform/bootstrap_state init
+      - run: terraform -chdir=infra/terraform/bootstrap_state validate
+
+  image:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: test
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      registry: ${{ steps.ecr.outputs.registry }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+      - name: Login to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Build and push image
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          REPOSITORY: agriculture-rag
+        run: docker build -t "$REGISTRY/$REPOSITORY:${GITHUB_SHA}" -t "$REGISTRY/$REPOSITORY:latest" . && docker push "$REGISTRY/$REPOSITORY:${GITHUB_SHA}" && docker push "$REGISTRY/$REPOSITORY:latest"
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: image
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+      - name: Deploy through Systems Manager
+        env:
+          INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
+          IMAGE: ${{ needs.image.outputs.registry }}/agriculture-rag:latest
+          CONFIG_PARAMETER: ${{ vars.APP_CONFIG_PARAMETER || '/agriculture-rag/production/env' }}
+        run: |
+          aws ssm send-command \
+            --instance-ids "$INSTANCE_ID" \
+            --document-name AWS-RunShellScript \
+            --parameters commands="[
+              \"set -eu\",
+              \"aws ecr get-login-password --region ${{ vars.AWS_REGION || 'us-east-1' }} | docker login --username AWS --password-stdin ${IMAGE%%/*}\",
+              \"aws ssm get-parameter --name '$CONFIG_PARAMETER' --with-decryption --query Parameter.Value --output text > /opt/agriculture-rag/.env\",
+              \"chmod 600 /opt/agriculture-rag/.env\",
+              \"docker pull $IMAGE\",
+              \"docker rm -f agriculture-rag || true\",
+              \"docker run -d --name agriculture-rag --restart unless-stopped --env-file /opt/agriculture-rag/.env -p 8000:8000 --read-only --tmpfs /tmp --cap-drop ALL --security-opt no-new-privileges $IMAGE\"
+            ]" \
+            --comment "Deploy ${GITHUB_SHA}"
