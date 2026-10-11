@@ -37,6 +37,9 @@ spacy==3.7.2
 # ========== Utilities ==========
 python-dotenv==1.0.0
 pydantic==2.5.3
+numpy>=1.26.0
+requests>=2.31.0
+scipy>=1.11.0
 tqdm==4.66.1
 tenacity==8.2.3
 

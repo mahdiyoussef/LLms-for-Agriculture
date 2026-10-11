@@ -55,3 +55,64 @@ def test_injection_pattern_is_rejected():
 def test_empty_secret_configuration_fails():
     with pytest.raises(ValueError, match="JWT_SECRET"):
         APISettings(jwt_secret="", admin_password="test-password").validate()
+
+
+def test_authenticated_agent_catalog_is_available():
+    client = make_client()
+    token = client.post(
+        "/auth/token",
+        json={"username": "admin", "password": "test-password"},
+    ).json()["access_token"]
+    response = client.get("/agents", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    assert {item["name"] for item in response.json()} == {
+        "climate-risk",
+        "crop-disease",
+        "crop-planning",
+        "extension",
+        "farm-copilot",
+        "irrigation",
+        "market-intelligence",
+        "pest-monitoring",
+        "soil-health",
+        "traceability",
+    }
+
+
+def test_authenticated_agent_execution_returns_safety_boundary():
+    client = make_client()
+    token = client.post(
+        "/auth/token",
+        json={"username": "admin", "password": "test-password"},
+    ).json()["access_token"]
+    response = client.post(
+        "/agents/irrigation/run",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "question": "How much should I irrigate?",
+            "context": {
+                "evapotranspiration_mm": 5,
+                "rainfall_mm": 1,
+                "efficiency": 0.8,
+            },
+        },
+    )
+    assert response.status_code == 200
+    assert response.json()["requires_confirmation"] is True
+    assert response.json()["answer"] == "Estimated irrigation requirement is 5.0 mm for the supplied period."
+
+
+def test_query_can_route_to_agent():
+    client = make_client()
+    token = client.post(
+        "/auth/token",
+        json={"username": "admin", "password": "test-password"},
+    ).json()["access_token"]
+    response = client.post(
+        "/query",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"question": "Explain crop rotation", "agent_name": "crop-planning"},
+    )
+    assert response.status_code == 200
+    assert response.json()["provider"] == "agriculture-agent"
+    assert response.json()["model"] == "crop-planning"

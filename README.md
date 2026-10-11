@@ -62,6 +62,40 @@ HTTPS/localhost restrictions for MCP endpoints, and explicit CORS configuration.
 For production, use a managed secret store, HTTPS behind an ALB or reverse proxy,
 and AWS Bedrock Guardrails in front of model responses.
 
+## Agriculture agents
+
+The platform includes ten deterministic, explainable decision-support agents under
+[`src/agents/agriculture/`](src/agents/agriculture/):
+
+| Agent | Responsibility |
+| --- | --- |
+| Crop disease | Produces a preliminary symptom assessment and requires agronomist confirmation before treatment |
+| Irrigation | Calculates irrigation depth from evapotranspiration, rainfall, crop coefficient, and system efficiency |
+| Pest monitoring | Compares trap counts and raises an integrated-pest-management warning |
+| Soil health | Calculates nutrient deficits from laboratory values |
+| Crop planning | Checks basic crop-rotation conflicts and planning constraints |
+| Climate risk | Detects frost and heat-stress thresholds |
+| Market intelligence | Calculates estimated net revenue from quantity, price, and costs |
+| Traceability | Checks whether a harvest batch has a usable event timeline |
+| Extension | Provides a safe localized-guidance starting point for RAG explanations |
+| Farm copilot | Coordinates specialist assessments and propagates warnings and confirmation requirements |
+
+All agents implement the shared contracts in
+[`src/agents/agriculture/base.py`](src/agents/agriculture/base.py). Numeric decisions
+are performed by deterministic functions in
+[`src/agents/agriculture/services.py`](src/agents/agriculture/services.py); a model
+can explain those results without becoming the source of truth for calculations.
+
+Authenticated endpoints:
+
+```text
+GET  /agents
+POST /agents/{agent_name}/run
+```
+
+Operational agents return `requires_confirmation: true` when a recommendation could
+affect equipment, chemicals, farm records, or other external systems.
+
 ## Deployment
 
 - `Dockerfile` and `docker-compose.yml` provide a non-root, read-only container baseline.
@@ -203,6 +237,7 @@ infrastructure can be documented and tested independently.
 | Area | Primary files | Responsibility |
 |---|---|---|
 | API composition | [src/api/app.py](src/api/app.py), [src/api/models.py](src/api/models.py) | FastAPI application factory, routes, request and response schemas |
+| Agriculture agents | [src/agents/agriculture/](src/agents/agriculture/) | Shared contracts, deterministic calculators, ten specialist agents, and registry |
 | Authentication | [src/api/auth.py](src/api/auth.py), [src/api/settings.py](src/api/settings.py) | Local JWT issuance, OIDC JWT validation, configuration validation |
 | Guardrails | [src/api/guardrails.py](src/api/guardrails.py), [src/api/guardrails_policy.py](src/api/guardrails_policy.py) | Input validation, prompt-injection checks, secret redaction, policy defaults |
 | Providers | [src/api/providers.py](src/api/providers.py) | Provider-neutral generation interface for local RAG and Bedrock |

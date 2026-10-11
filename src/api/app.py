@@ -13,9 +13,19 @@ import httpx
 from fastapi.middleware.cors import CORSMiddleware
 
 from .auth import build_current_user, issue_token, verify_password
+from src.agents.agriculture import AgentRequest, build_default_registry
 from .guardrails import redact_secrets, validate_question
 from .mcp import MCPClient
-from .models import QueryRequest, QueryResponse, SearchRequest, TokenRequest, TokenResponse
+from .models import (
+    AgentInfo,
+    AgentRunRequest,
+    AgentRunResponse,
+    QueryRequest,
+    QueryResponse,
+    SearchRequest,
+    TokenRequest,
+    TokenResponse,
+)
 from .providers import BedrockProvider, LocalProvider
 from .settings import APISettings
 from .web_search import WebSearchAgent
@@ -31,6 +41,7 @@ def create_app(settings: APISettings | None = None, validate_settings: bool = Tr
         yield
 
     app = FastAPI(title=settings.api_title, version=settings.api_version, lifespan=lifespan)
+    agent_registry = build_default_registry()
     audit_logger = logging.getLogger("agriculture_rag.audit")
     request_windows: dict[str, deque[float]] = defaultdict(deque)
 
@@ -79,9 +90,56 @@ def create_app(settings: APISettings | None = None, validate_settings: bool = Tr
 
     bearer_dependency = Depends(build_current_user(settings))
 
+    @app.get("/agents", response_model=list[AgentInfo])
+    async def agents(user: dict = bearer_dependency) -> list[AgentInfo]:
+        return [AgentInfo(name=name) for name in agent_registry.names()]
+
+    @app.post("/agents/{agent_name}/run", response_model=AgentRunResponse)
+    async def run_agent(
+        agent_name: str,
+        request: AgentRunRequest,
+        user: dict = bearer_dependency,
+    ) -> AgentRunResponse:
+        question = validate_question(request.question)
+        try:
+            result = agent_registry.run(
+                agent_name,
+                AgentRequest(
+                    user_id=str(user.get("sub", "authenticated-user")),
+                    farm_id=request.farm_id,
+                    question=question,
+                    context=request.context,
+                ),
+            )
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except (TypeError, ValueError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        return AgentRunResponse(**result.to_dict())
+
     @app.post("/query", response_model=QueryResponse)
     async def query(request: QueryRequest, user: dict = bearer_dependency) -> QueryResponse:
         question = validate_question(request.question)
+        if request.use_agent or request.agent_name:
+            agent_name = request.agent_name or "farm-copilot"
+            try:
+                result = agent_registry.run(
+                    agent_name,
+                    AgentRequest(
+                        user_id=str(user.get("sub", "authenticated-user")),
+                        farm_id="default",
+                        question=question,
+                        context={},
+                    ),
+                )
+            except KeyError as exc:
+                raise HTTPException(status_code=404, detail=str(exc)) from exc
+            return QueryResponse(
+                answer=redact_secrets(result.answer),
+                provider="agriculture-agent",
+                model=result.agent_name,
+                sources=[item.source for item in result.evidence],
+            )
         if settings.provider == "bedrock":
             provider = BedrockProvider(
                 settings.bedrock_region,
