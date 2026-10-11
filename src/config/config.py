@@ -6,7 +6,12 @@ Supports environment variables via .env file.
 """
 import os
 from pathlib import Path
-import torch
+try:
+    import torch
+    _TORCH_OK = True
+except ImportError:  # P0.1: allow tests/eval/tracing without GPU deps
+    torch = None  # type: ignore
+    _TORCH_OK = False
 import logging
 
 # Load environment variables from .env file
@@ -32,12 +37,13 @@ for dir_path in [VECTOR_STORE_DIR, KNOWLEDGE_GRAPH_DIR, CHUNKS_DIR, METADATA_DIR
 
 # ========== DEVICE CONFIGURATION ==========
 _device_env = os.getenv("EMBEDDING_DEVICE", "").lower()
-if _device_env == "cuda" and torch.cuda.is_available():
+_cuda_ok = _TORCH_OK and torch.cuda.is_available()
+if _device_env == "cuda" and _cuda_ok:
     DEVICE = "cuda"
 elif _device_env == "cpu":
     DEVICE = "cpu"
 else:
-    DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+    DEVICE = "cuda" if _cuda_ok else "cpu"
 
 # ========== LLM CONFIGURATION ==========
 LLM_CONFIG = {

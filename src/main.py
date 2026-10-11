@@ -25,6 +25,8 @@ from src.generation.memory_manager import MemoryManager
 from src.generation.rag_chain import RAGChain
 from src.generation.rag_orchestrator import RAGOrchestrator
 from src.utils.evaluator import AgronomistAuditor
+from src.utils.tracing import span
+from src.utils.index_manifest import check_manifest
 
 
 class PrecisionAgricultureRAG:
@@ -58,6 +60,7 @@ class PrecisionAgricultureRAG:
         self.query_router = QueryRouter()  # Smart query routing
         self.memory = MemoryManager()
         self.auditor = None  # Lazy-loaded evaluator
+        self._manifest_ok = True  # Set False by manifest check in _load_existing_data
         
         # Hybrid retriever (initialized after loading documents)
         self.hybrid_retriever: Optional[HybridRetriever] = None
@@ -79,7 +82,17 @@ class PrecisionAgricultureRAG:
             return
         
         logger.info(f"Loaded vector store with {doc_count} documents")
-        
+
+        # P0.5: refuse to serve on an embedder/index mismatch (R2: reversible
+        # via GA_RAG_ALLOW_MANIFEST_MISMATCH=1).
+        try:
+            man = check_manifest()
+            logger.info(f"Index manifest OK: {man['stored']}")
+            self._manifest_ok = True
+        except RuntimeError as e:
+            logger.error(str(e))
+            self._manifest_ok = False
+
         # Load knowledge graph
         self.knowledge_graph.load()
         
@@ -139,11 +152,23 @@ class PrecisionAgricultureRAG:
                 "sources": [],
                 "confidence": 0.0
             }
-        
+        if getattr(self, "_manifest_ok", True) is False:
+            return {
+                "answer": ("Refusing to query: index manifest mismatch (embedder/chunker/corpus "
+                           "changed since ingest). Re-run ingestion or set "
+                           "GA_RAG_ALLOW_MANIFEST_MISMATCH=1 to override."),
+                "sources": [],
+                "confidence": 0.0,
+                "evidence_strength": "low",
+            }
+
         logger.info(f"Processing query: {question[:50]}...")
-        
+
         # Smart query routing - get optimal strategy based on intent
-        strategy, intent, routing_confidence = self.query_router.get_strategy(question)
+        with span("route", {"question_chars": len(question)}) as s:
+            strategy, intent, routing_confidence = self.query_router.get_strategy(question)
+            s.set("intent", intent.value)
+            s.set("routing_confidence", round(routing_confidence, 3))
         
         # Adjust parameters based on strategy
         effective_top_k = strategy.top_k if strategy.top_k else top_k
@@ -161,16 +186,19 @@ class PrecisionAgricultureRAG:
         
         # Retrieve documents using all query variations
         all_docs = {}
-        for q in all_queries:
-            docs = self.hybrid_retriever.retrieve(q, top_k=effective_top_k * 2)
-            for doc in docs:
-                doc_id = doc.get("id", doc.get("chunk_id"))
-                if doc_id not in all_docs:
-                    all_docs[doc_id] = doc
-                else:
-                    # Keep higher score
-                    if doc.get("retrieval_score", 0) > all_docs[doc_id].get("retrieval_score", 0):
+        with span("retrieve", {"num_variants": len(all_queries),
+                               "top_k": effective_top_k * 2}) as s:
+            for q in all_queries:
+                docs = self.hybrid_retriever.retrieve(q, top_k=effective_top_k * 2)
+                for doc in docs:
+                    doc_id = doc.get("id", doc.get("chunk_id"))
+                    if doc_id not in all_docs:
                         all_docs[doc_id] = doc
+                    else:
+                        # Keep higher score
+                        if doc.get("retrieval_score", 0) > all_docs[doc_id].get("retrieval_score", 0):
+                            all_docs[doc_id] = doc
+            s.set("num_candidates", len(all_docs))
         
         # Convert to list and sort by score
         documents = sorted(
@@ -181,7 +209,9 @@ class PrecisionAgricultureRAG:
         
         # Reranking
         if use_reranking and documents:
-            documents = self.reranker.rerank(question, documents, top_k=effective_top_k)
+            with span("rerank", {"num_candidates": len(documents),
+                                 "top_k": effective_top_k}):
+                documents = self.reranker.rerank(question, documents, top_k=effective_top_k)
             logger.info(f"Reranked to {len(documents)} documents")
         else:
             documents = documents[:effective_top_k]

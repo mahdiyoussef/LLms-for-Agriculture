@@ -444,7 +444,7 @@ def main():
     
     for query in test_queries:
         is_relevant, confidence, reasons = agent.is_weather_relevant(query)
-        status = "✓ RELEVANT" if is_relevant else "✗ Not relevant"
+        status = "RELEVANT" if is_relevant else "Not relevant"
         print(f"\n{status} (conf: {confidence:.2f})")
         print(f"  Query: {query}")
         if reasons:

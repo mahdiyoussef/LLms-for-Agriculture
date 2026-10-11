@@ -13,6 +13,8 @@ from langchain.prompts import PromptTemplate
 from langchain.schema import Document
 
 from ..config.config import LLM_CONFIG, GENERATION_CONFIG, SYSTEM_PROMPT, CITATION_CONFIG, logger
+from ..utils.safety import chemical_dose_refusal, evidence_strength, has_citation
+from ..utils.tracing import span
 from .memory_manager import MemoryManager
 
 
@@ -169,29 +171,58 @@ QUESTION: {question}
         )
         
         logger.debug(f"Prompt length: {len(prompt)} chars")
-        
-        # Generate response
-        try:
-            response = self.llm.invoke(prompt)
-        except Exception as e:
-            logger.error(f"LLM generation failed: {e}")
-            response = f"I apologize, but I encountered an error generating the response: {str(e)}"
-        
+
+        # P0 quick win (G7): token-budget logging. chars/4 heuristic until the
+        # tokenizer-based budgeter (P1.7) lands. Never silently truncate.
+        est_tokens = len(prompt) // 4
+        num_ctx = LLM_CONFIG.get("num_ctx", 4096)
+        truncation_warning = est_tokens > num_ctx
+        if truncation_warning:
+            logger.warning(
+                f"Prompt ~{est_tokens} tokens exceeds num_ctx={num_ctx}; "
+                "evidence may be silently truncated by the LLM server.")
+
+        with span("generate", {"est_prompt_tokens": est_tokens,
+                               "num_ctx": num_ctx,
+                               "truncation_warning": truncation_warning,
+                               "num_docs": len(documents)}):
+            # Generate response
+            try:
+                response = self.llm.invoke(prompt)
+            except Exception as e:
+                logger.error(f"LLM generation failed: {e}")
+                response = f"I apologize, but I encountered an error generating the response: {str(e)}"
+
         # Extract citations from response
         citations = self.format_citations(documents)
-        
+
+        # P0 safety deny rule (R5): chemical/pesticide dose without a cited
+        # authoritative source -> refuse and refer to an extension officer.
+        refusal = chemical_dose_refusal(question, response)
+        if refusal:
+            logger.warning("Chemical-dose request without cited source; refusing.")
+            response = refusal
+
         # Calculate confidence (simple heuristic based on context relevance)
         confidence = self._estimate_confidence(response, documents)
-        
+
+        # Interim trust display (G4): evidence strength replaces the raw %
+        # in user-facing output until P2.6 calibration exists.
+        strength = evidence_strength(len(documents), has_citation(response))
+
         # Save to memory
         if use_memory and self.memory:
             self.memory.add_exchange(question, response)
-        
+
         return {
             "answer": response,
             "sources": [doc.get("metadata", {}).get("source", doc.get("source")) for doc in documents],
             "citations": citations,
             "confidence": confidence,
+            "evidence_strength": strength,  # high/medium/low (interim, see safety.py)
+            "prompt_est_tokens": est_tokens,
+            "truncation_warning": truncation_warning,
+            "refused_chemical_dose": refusal is not None,
             "num_sources": len(documents),
         }
     

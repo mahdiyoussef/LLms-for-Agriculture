@@ -14,7 +14,10 @@ from dataclasses import dataclass, field
 from enum import Enum
 from abc import ABC, abstractmethod
 
-from langchain_community.llms import Ollama
+try:
+    from langchain_community.llms import Ollama
+except ImportError:  # pragma: no cover - optional dependency in test env
+    Ollama = None
 
 from src.config.config import LLM_CONFIG, logger
 
@@ -101,12 +104,17 @@ class LLMJudge(ABC):
     def __init__(self, model: str = None, base_url: str = None):
         self.model = model or LLM_CONFIG["model"]
         self.base_url = base_url or LLM_CONFIG["base_url"]
-        self.llm = Ollama(
-            model=self.model,
-            base_url=self.base_url,
-            temperature=0.0,  # Deterministic for consistent evaluation
-            num_ctx=4096,
-        )
+        self.llm = None
+        if Ollama is not None:
+            try:
+                self.llm = Ollama(
+                    model=self.model,
+                    base_url=self.base_url,
+                    temperature=0.0,  # Deterministic for consistent evaluation
+                    num_ctx=4096,
+                )
+            except Exception as exc:
+                logger.warning(f"Failed to initialize evaluation judge LLM: {exc}")
     
     @abstractmethod
     def evaluate(self, *args, **kwargs) -> JudgeScore:

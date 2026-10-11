@@ -20,11 +20,57 @@ from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass, field, asdict
 import numpy as np
 
-from sentence_transformers import SentenceTransformer
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from pypdf import PdfReader
-import pdfplumber
-from tqdm import tqdm
+try:
+    from sentence_transformers import SentenceTransformer
+except ImportError:  # pragma: no cover - optional dependency in test env
+    SentenceTransformer = None
+
+try:
+    from langchain.text_splitter import RecursiveCharacterTextSplitter
+except ImportError:  # pragma: no cover - optional dependency in test env
+    RecursiveCharacterTextSplitter = None
+
+try:
+    from pypdf import PdfReader
+except ImportError:  # pragma: no cover - optional dependency in test env
+    PdfReader = None
+
+try:
+    import pdfplumber
+except ImportError:  # pragma: no cover - optional dependency in test env
+    pdfplumber = None
+
+try:
+    from tqdm import tqdm
+except ImportError:  # pragma: no cover - optional dependency in test env
+    def tqdm(iterable=None, *args, **kwargs):
+        return iterable if iterable is not None else []
+
+
+class _SimpleEmbeddingModel:
+    """Deterministic fallback embedding model used when optional ML deps are absent."""
+
+    def __init__(self, dimension: int = 384):
+        self.dimension = dimension
+
+    def encode(self, texts, show_progress_bar: bool = False):
+        if isinstance(texts, str):
+            texts = [texts]
+        embeddings = np.zeros((len(texts), self.dimension), dtype=np.float32)
+        for i, text in enumerate(texts):
+            if not text:
+                continue
+            vector = np.zeros(self.dimension, dtype=np.float32)
+            digest = hashlib.sha256(text.encode("utf-8")).digest()
+            for j, value in enumerate(digest):
+                vector[(j * 11) % self.dimension] += float(value)
+            for j, ch in enumerate(text):
+                vector[(j * 7) % self.dimension] += float(ord(ch)) / max(len(text), 1)
+            norm = np.linalg.norm(vector)
+            if norm > 0:
+                vector = vector / norm
+            embeddings[i] = vector
+        return embeddings
 
 from ..config.config import (
     DOCUMENTS_DIR, CHUNKS_DIR, DATA_DIR,
@@ -316,23 +362,26 @@ class ChunkingEvaluator:
     
     def __init__(
         self, 
-        embedding_model: SentenceTransformer = None,
+        embedding_model=None,
         window_size: int = 3,
         k_threshold: float = 1.5
     ):
         """
         Initialize the chunking evaluator.
-        
+
         Args:
             embedding_model: Pre-loaded sentence transformer model
             window_size: Sliding window size for change point detection (W=3 default)
             k_threshold: Standard deviation multiplier for boundary detection
         """
         if embedding_model is None:
-            embedding_model = SentenceTransformer(
-                EMBEDDING_CONFIG["model_name"], 
-                device=DEVICE
-            )
+            if SentenceTransformer is not None:
+                embedding_model = SentenceTransformer(
+                    EMBEDDING_CONFIG["model_name"],
+                    device=DEVICE,
+                )
+            else:
+                embedding_model = _SimpleEmbeddingModel()
         self.embedding_model = embedding_model
         self.window_size = window_size
         self.k_threshold = k_threshold

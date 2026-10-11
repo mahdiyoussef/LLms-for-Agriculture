@@ -529,10 +529,10 @@ class WeatherService:
         if include_forecast and data.forecast:
             lines.extend(["", "7-DAY FORECAST:"])
             for day in data.forecast[:7]:
-                rain_icon = "🌧️" if day.precipitation_probability > 50 else "☀️"
+                rain_label = "rain" if day.precipitation_probability > 50 else "clear"
                 lines.append(
                     f"  {day.date}: {day.temp_min:.0f}-{day.temp_max:.0f}°C, "
-                    f"{rain_icon} {day.precipitation_probability:.0f}% rain, "
+                    f"{rain_label} ({day.precipitation_probability:.0f}% chance), "
                     f"{day.description}"
                 )
         

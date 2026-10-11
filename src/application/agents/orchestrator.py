@@ -9,7 +9,10 @@ from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 
-from langchain_community.llms import Ollama
+try:
+    from langchain_community.llms import Ollama
+except ImportError:  # pragma: no cover - optional dependency in test env
+    Ollama = None
 
 from src.config.config import LLM_CONFIG, SYSTEM_PROMPT, logger
 from src.retrieval.query_router import QueryRouter, QueryIntent
@@ -132,15 +135,20 @@ ACTION: [tool_name](param1, param2)
         self.max_iterations = max_iterations
         self.query_router = QueryRouter()
         
-        # Initialize LLM for reasoning
-        self.llm = Ollama(
-            model=LLM_CONFIG["model"],
-            base_url=LLM_CONFIG["base_url"],
-            temperature=0.3,
-            repeat_penalty=LLM_CONFIG["repeat_penalty"],
-            stop=LLM_CONFIG.get("stop", []),
-        )
-        
+        # Initialize LLM for reasoning when the optional LangChain dependency exists.
+        self.llm = None
+        if Ollama is not None:
+            try:
+                self.llm = Ollama(
+                    model=LLM_CONFIG["model"],
+                    base_url=LLM_CONFIG["base_url"],
+                    temperature=0.3,
+                    repeat_penalty=LLM_CONFIG["repeat_penalty"],
+                    stop=LLM_CONFIG.get("stop", []),
+                )
+            except Exception as exc:
+                logger.warning(f"Failed to initialize Ollama client: {exc}")
+
         logger.info("RAGOrchestrator initialized with ReAct loop")
     
     # =========================================================================
