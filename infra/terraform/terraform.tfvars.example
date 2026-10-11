@@ -1,0 +1,13 @@
+aws_region              = "us-east-1"
+ami_id                  = "ami-00000000000000000"
+instance_type           = "t3.medium"
+ssh_public_key          = "ssh-ed25519 AAAA... deployment-key"
+vpc_id                  = "vpc-00000000000000000"
+subnet_id               = "subnet-00000000000000000"
+alb_subnet_ids          = ["subnet-00000000000000000", "subnet-00000000000000001"]
+allowed_cidr            = "203.0.113.10/32"
+ssh_cidr                = "203.0.113.10/32"
+certificate_arn         = "arn:aws:acm:us-east-1:000000000000:certificate/replace-me"
+github_repository       = "owner/repository"
+bedrock_model_id        = "anthropic.claude-3-haiku-20240307-v1:0"
+app_config_parameter_name = "/agriculture-rag/production/env"

@@ -1,0 +1,4 @@
+bucket       = "replace-with-your-terraform-state-bucket"
+key          = "agriculture-rag/terraform.tfstate"
+region       = "us-east-1"
+use_lockfile = true
