@@ -45,6 +45,9 @@ API_ADMIN_PASSWORD_HASH=<PBKDF2 hash generated with python scripts/generate_pass
 RAG_PROVIDER=bedrock
 AWS_REGION=<deployment-region>
 BEDROCK_MODEL_ID=<approved-model-id>
+AGENT_MEMORY_DB=/var/lib/agriculture-rag/agent-memory.sqlite3
+AGENT_MEMORY_MAX_ENTRIES=20
+AGENT_MEMORY_RETENTION_DAYS=90
 ```
 
 For Cognito/Auth0/Okta, set `API_AUTH_MODE=oidc`, `OIDC_ISSUER`, and
@@ -52,6 +55,9 @@ For Cognito/Auth0/Okta, set `API_AUTH_MODE=oidc`, `OIDC_ISSUER`, and
 
 Do not commit this value or place it in Terraform variables. The EC2 role reads it
 only during deployment through Systems Manager.
+The deployment creates a named Docker volume, `agriculture-rag-memory`, mounted at
+`/var/lib/agriculture-rag`, so bounded agent memory survives container replacement
+while remaining local to the private EC2 host.
 
 ## GitHub environment
 

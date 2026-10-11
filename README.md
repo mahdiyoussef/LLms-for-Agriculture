@@ -55,6 +55,9 @@ The API provides:
 - `POST /query` for authenticated RAG requests
 - `POST /web/search` for bounded public web search
 - `GET /mcp/{server_index}/tools` for allowlisted MCP server discovery
+- `GET /agents` for the registered agriculture-agent catalog
+- `POST /agents/{agent_name}/run` for authenticated specialist execution
+- `GET /agents/memory` and `DELETE /agents/memory` for user-controlled farm memory
 - `GET /health` for liveness
 
 The API applies prompt-injection checks, request-size limits, credential redaction,
@@ -96,9 +99,31 @@ POST /agents/{agent_name}/run
 Operational agents return `requires_confirmation: true` when a recommendation could
 affect equipment, chemicals, farm records, or other external systems.
 
+### Agent memory and decision quality
+
+Agent memory is persisted in SQLite, scoped by the authenticated user and farm,
+bounded by `AGENT_MEMORY_MAX_ENTRIES`, expired after
+`AGENT_MEMORY_RETENTION_DAYS`, and mounted outside the read-only application
+filesystem in production. Stored content is normalized, length-limited, and
+credential-redacted. Users can inspect or delete their farm memory through the
+authenticated memory endpoints.
+
+The agent layer follows a state-of-the-art decision-support pattern rather than
+delegating agronomic calculations to a language model:
+
+- deterministic formulas for irrigation, nutrient deficits, and revenue
+- retrieval/provider evidence kept separate from computed values
+- calibrated confidence and explicit abstention/confirmation signals
+- integrated pest-management and agronomist escalation safeguards
+- scoped memory instead of global conversational leakage
+- human approval before physical, chemical, financial, or record-changing actions
+- evaluation through unit, safety, regression, and retrieval-quality test suites
+
 ## Deployment
 
 - `Dockerfile` and `docker-compose.yml` provide a non-root, read-only container baseline.
+- The runtime mounts a named `agent-memory` volume at
+  `/var/lib/agriculture-rag` so memory survives image replacement.
 - `.github/workflows/ci-cd.yml` runs tests, audits dependencies, publishes to Amazon ECR,
   and deploys to EC2 through AWS Systems Manager.
 - `infra/terraform` provisions the EC2 instance, HTTPS Application Load Balancer, ECR,

@@ -50,6 +50,13 @@ class AgentRunResponse(BaseModel):
     requires_confirmation: bool
 
 
+class MemoryEntryResponse(BaseModel):
+    role: str
+    agent_name: str
+    content: str
+    created_at: str
+
+
 class SearchRequest(BaseModel):
     query: str = Field(min_length=1, max_length=500)
     limit: int = Field(default=5, ge=1, le=10)

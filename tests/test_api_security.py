@@ -116,3 +116,15 @@ def test_query_can_route_to_agent():
     assert response.status_code == 200
     assert response.json()["provider"] == "agriculture-agent"
     assert response.json()["model"] == "crop-planning"
+
+
+def test_memory_is_authenticated_and_can_be_deleted():
+    client = make_client()
+    token = client.post(
+        "/auth/token",
+        json={"username": "admin", "password": "test-password"},
+    ).json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+    response = client.get("/agents/memory", headers=headers)
+    assert response.status_code == 200
+    assert client.delete("/agents/memory", headers=headers).status_code == 204

@@ -2,6 +2,13 @@
 
 from __future__ import annotations
 
+import math
+
+
+def _finite(*values: float) -> None:
+    if not all(math.isfinite(value) for value in values):
+        raise ValueError("numeric inputs must be finite")
+
 
 def irrigation_need_mm(
     evapotranspiration_mm: float,
@@ -10,6 +17,7 @@ def irrigation_need_mm(
     efficiency: float = 0.8,
 ) -> float:
     """Estimate net irrigation depth after rainfall and system losses."""
+    _finite(evapotranspiration_mm, rainfall_mm, crop_coefficient, efficiency)
     if evapotranspiration_mm < 0 or rainfall_mm < 0:
         raise ValueError("weather amounts cannot be negative")
     if crop_coefficient <= 0 or efficiency <= 0 or efficiency > 1:
@@ -19,6 +27,7 @@ def irrigation_need_mm(
 
 def nutrient_deficit(required: float, available: float) -> float:
     """Return a non-negative nutrient deficit in the caller's units."""
+    _finite(required, available)
     if required < 0 or available < 0:
         raise ValueError("nutrient values cannot be negative")
     return round(max(0.0, required - available), 2)
@@ -26,6 +35,7 @@ def nutrient_deficit(required: float, available: float) -> float:
 
 def net_market_revenue(quantity: float, price: float, costs: float = 0.0) -> float:
     """Calculate revenue after explicitly supplied costs."""
+    _finite(quantity, price, costs)
     if quantity < 0 or price < 0 or costs < 0:
         raise ValueError("quantity, price, and costs cannot be negative")
     return round(quantity * price - costs, 2)

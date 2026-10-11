@@ -155,4 +155,9 @@ class FarmCopilotAgent:
         warnings = tuple(warning for result in results for warning in result.warnings)
         actions = tuple(action for result in results for action in result.actions)
         confidence = round(sum(result.confidence for result in results) / len(results), 2)
-        return AgentResponse(self.name, f"Collected {len(results)} specialist assessments.", actions, tuple(item for result in results for item in result.evidence), warnings, confidence, any(result.requires_confirmation for result in results))
+        memory = request.context.get("recent_memory", [])
+        memory_note = f" Considered {len(memory)} prior farm observations." if memory else ""
+        evidence = tuple(item for result in results for item in result.evidence)
+        if memory:
+            evidence += (AgentEvidence("agent-memory", "Prior scoped farm observations were supplied as context.", 0.6),)
+        return AgentResponse(self.name, f"Collected {len(results)} specialist assessments.{memory_note}", actions, evidence, warnings, confidence, any(result.requires_confirmation for result in results))

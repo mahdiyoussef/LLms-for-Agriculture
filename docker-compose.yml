@@ -6,6 +6,8 @@ services:
     ports:
       - "8000:8000"
     read_only: true
+    volumes:
+      - agent-memory:/var/lib/agriculture-rag
     tmpfs:
       - /tmp
     security_opt:
@@ -13,3 +15,5 @@ services:
     cap_drop:
       - ALL
     restart: unless-stopped
+volumes:
+  agent-memory:

@@ -149,43 +149,43 @@ resource "aws_lb_listener" "https" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.api.arn
   }
+}
 
-  resource "aws_wafv2_web_acl" "api" {
-    name  = "agriculture-rag-api"
-    scope = "REGIONAL"
+resource "aws_wafv2_web_acl" "api" {
+  name  = "agriculture-rag-api"
+  scope = "REGIONAL"
 
-    default_action {
-      allow {}
+  default_action {
+    allow {}
+  }
+
+  rule {
+    name     = "rate-limit"
+    priority = 1
+    action {
+      block {}
     }
-
-    rule {
-      name     = "rate-limit"
-      priority = 1
-      action {
-        block {}
-      }
-      statement {
-        rate_based_statement {
-          limit              = var.waf_rate_limit
-          aggregate_key_type = "IP"
-        }
-      }
-      visibility_config {
-        cloudwatch_metrics_enabled = true
-        metric_name                = "agriculture-rag-rate-limit"
-        sampled_requests_enabled   = true
+    statement {
+      rate_based_statement {
+        limit              = var.waf_rate_limit
+        aggregate_key_type = "IP"
       }
     }
-
     visibility_config {
       cloudwatch_metrics_enabled = true
-      metric_name                = "agriculture-rag-api"
+      metric_name                = "agriculture-rag-rate-limit"
       sampled_requests_enabled   = true
     }
   }
 
-  resource "aws_wafv2_web_acl_association" "api" {
-    resource_arn = aws_lb.api.arn
-    web_acl_arn  = aws_wafv2_web_acl.api.arn
+  visibility_config {
+    cloudwatch_metrics_enabled = true
+    metric_name                = "agriculture-rag-api"
+    sampled_requests_enabled   = true
   }
+}
+
+resource "aws_wafv2_web_acl_association" "api" {
+  resource_arn = aws_lb.api.arn
+  web_acl_arn  = aws_wafv2_web_acl.api.arn
 }

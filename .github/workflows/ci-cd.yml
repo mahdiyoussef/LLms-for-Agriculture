@@ -20,7 +20,7 @@ jobs:
       - run: python -m compileall -q src
       - run: pip install pip-audit
       - run: pip-audit -r requirements.txt
-      - run: pytest tests/test_core.py tests/test_api_security.py -q
+      - run: pytest -q
 
   terraform:
     runs-on: ubuntu-latest
@@ -88,6 +88,7 @@ jobs:
               \"chmod 600 /opt/agriculture-rag/.env\",
               \"docker pull $IMAGE\",
               \"docker rm -f agriculture-rag || true\",
-              \"docker run -d --name agriculture-rag --restart unless-stopped --env-file /opt/agriculture-rag/.env -p 8000:8000 --read-only --tmpfs /tmp --cap-drop ALL --security-opt no-new-privileges $IMAGE\"
+              \"docker volume create agriculture-rag-memory >/dev/null\",
+              \"docker run -d --name agriculture-rag --restart unless-stopped --env-file /opt/agriculture-rag/.env -p 8000:8000 --read-only --tmpfs /tmp --mount type=volume,source=agriculture-rag-memory,target=/var/lib/agriculture-rag --cap-drop ALL --security-opt no-new-privileges $IMAGE\"
             ]" \
             --comment "Deploy ${GITHUB_SHA}"

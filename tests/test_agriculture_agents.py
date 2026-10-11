@@ -82,3 +82,8 @@ def test_market_revenue_is_net_of_costs():
 def test_calculators_reject_negative_inputs(calculator, args):
     with pytest.raises(ValueError):
         calculator(*args)
+
+
+def test_calculators_reject_non_finite_inputs():
+    with pytest.raises(ValueError):
+        irrigation_need_mm(float("nan"), 0)

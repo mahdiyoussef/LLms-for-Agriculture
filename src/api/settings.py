@@ -45,6 +45,9 @@ class APISettings:
     )
     request_timeout_seconds: float = float(os.getenv("API_REQUEST_TIMEOUT", "20"))
     rate_limit_per_minute: int = int(os.getenv("API_RATE_LIMIT_PER_MINUTE", "60"))
+    agent_memory_db: str = os.getenv("AGENT_MEMORY_DB", "data/agent-memory.sqlite3")
+    agent_memory_max_entries: int = int(os.getenv("AGENT_MEMORY_MAX_ENTRIES", "20"))
+    agent_memory_retention_days: int = int(os.getenv("AGENT_MEMORY_RETENTION_DAYS", "90"))
 
     def validate(self) -> None:
         """Reject insecure production configuration before serving traffic."""
@@ -58,3 +61,5 @@ class APISettings:
             raise ValueError("API_AUTH_MODE must be local or oidc")
         if self.provider == "bedrock" and not self.bedrock_region:
             raise ValueError("AWS_REGION is required for the Bedrock provider")
+        if self.agent_memory_max_entries < 1 or self.agent_memory_retention_days < 1:
+            raise ValueError("Agent memory limits must be positive")

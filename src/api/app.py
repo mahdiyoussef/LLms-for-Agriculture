@@ -13,13 +13,14 @@ import httpx
 from fastapi.middleware.cors import CORSMiddleware
 
 from .auth import build_current_user, issue_token, verify_password
-from src.agents.agriculture import AgentRequest, build_default_registry
+from src.agents.agriculture import AgentMemoryStore, AgentRequest, build_default_registry
 from .guardrails import redact_secrets, validate_question
 from .mcp import MCPClient
 from .models import (
     AgentInfo,
     AgentRunRequest,
     AgentRunResponse,
+    MemoryEntryResponse,
     QueryRequest,
     QueryResponse,
     SearchRequest,
@@ -42,6 +43,11 @@ def create_app(settings: APISettings | None = None, validate_settings: bool = Tr
 
     app = FastAPI(title=settings.api_title, version=settings.api_version, lifespan=lifespan)
     agent_registry = build_default_registry()
+    memory_store = AgentMemoryStore(
+        settings.agent_memory_db,
+        settings.agent_memory_max_entries,
+        settings.agent_memory_retention_days,
+    )
     audit_logger = logging.getLogger("agriculture_rag.audit")
     request_windows: dict[str, deque[float]] = defaultdict(deque)
 
@@ -101,6 +107,12 @@ def create_app(settings: APISettings | None = None, validate_settings: bool = Tr
         user: dict = bearer_dependency,
     ) -> AgentRunResponse:
         question = validate_question(request.question)
+        memories = memory_store.recall(str(user.get("sub", "authenticated-user")), request.farm_id)
+        context = dict(request.context)
+        context["recent_memory"] = [
+            {"role": item.role, "agent": item.agent_name, "content": item.content}
+            for item in memories
+        ]
         try:
             result = agent_registry.run(
                 agent_name,
@@ -108,14 +120,43 @@ def create_app(settings: APISettings | None = None, validate_settings: bool = Tr
                     user_id=str(user.get("sub", "authenticated-user")),
                     farm_id=request.farm_id,
                     question=question,
-                    context=request.context,
+                    context=context,
                 ),
             )
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         except (TypeError, ValueError) as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
+        memory_store.remember(
+            str(user.get("sub", "authenticated-user")),
+            request.farm_id,
+            "user",
+            result.agent_name,
+            question,
+        )
+        memory_store.remember(
+            str(user.get("sub", "authenticated-user")),
+            request.farm_id,
+            "assistant",
+            result.agent_name,
+            result.answer,
+        )
         return AgentRunResponse(**result.to_dict())
+
+    @app.get("/agents/memory", response_model=list[MemoryEntryResponse])
+    async def agent_memory(
+        farm_id: str = "default",
+        user: dict = bearer_dependency,
+    ) -> list[MemoryEntryResponse]:
+        entries = memory_store.recall(str(user.get("sub", "authenticated-user")), farm_id)
+        return [MemoryEntryResponse(**entry.__dict__) for entry in entries]
+
+    @app.delete("/agents/memory", status_code=204)
+    async def clear_agent_memory(
+        farm_id: str = "default",
+        user: dict = bearer_dependency,
+    ) -> None:
+        memory_store.forget(str(user.get("sub", "authenticated-user")), farm_id)
 
     @app.post("/query", response_model=QueryResponse)
     async def query(request: QueryRequest, user: dict = bearer_dependency) -> QueryResponse:
