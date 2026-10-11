@@ -1,0 +1,450 @@
+[
+  {
+    "id": "legacy-024",
+    "question": "What is the role of an irrigation engineer in water conservation?",
+    "language": "en",
+    "intent": "factual",
+    "region": null,
+    "crop": null,
+    "nuggets": [
+      "water conservation",
+      "efficient systems",
+      "water reuse",
+      "farmer training"
+    ],
+    "answerable": true,
+    "review_status": "legacy_needs_review",
+    "source": "tests/irrigation_qa_dataset.json"
+  },
+  {
+    "id": "v1-029",
+    "question": "ach kay3ni ET0 b darija sahla?",
+    "language": "darija_latn",
+    "intent": "factual",
+    "region": null,
+    "crop": null,
+    "nuggets": [
+      "ET0 hiya lma li kaydi3 man jord o nabat",
+      "kat7dad chhal khass ts9i"
+    ],
+    "answerable": true,
+    "review_status": "draft",
+    "source": "authored-seed-v1"
+  },
+  {
+    "id": "legacy-044",
+    "question": "What are some common mistakes to avoid in designing an irrigation system?",
+    "language": "en",
+    "intent": "factual",
+    "region": null,
+    "crop": null,
+    "nuggets": [
+      "design mistakes",
+      "water source",
+      "pipe sizing",
+      "soil requirements",
+      "maintenance planning"
+    ],
+    "answerable": true,
+    "review_status": "legacy_needs_review",
+    "source": "tests/irrigation_qa_dataset.json"
+  },
+  {
+    "id": "v1-010",
+    "question": "Pourquoi la salinité de l'eau affecte-t-elle le rendement des agrumes ?",
+    "language": "fr",
+    "intent": "reasoning",
+    "region": "Souss-Massa",
+    "crop": "agrumes",
+    "nuggets": [
+      "stress osmotique",
+      "toxicité ionique",
+      "baisse de rendement au-delà du seuil"
+    ],
+    "answerable": true,
+    "review_status": "draft",
+    "source": "authored-seed-v1"
+  },
+  {
+    "id": "legacy-030",
+    "question": "What are some common causes of clogging in drip irrigation systems?",
+    "language": "en",
+    "intent": "factual",
+    "region": null,
+    "crop": null,
+    "nuggets": [
+      "clogging",
+      "water quality",
+      "pH",
+      "filtration",
+      "biological growth"
+    ],
+    "answerable": true,
+    "review_status": "legacy_needs_review",
+    "source": "tests/irrigation_qa_dataset.json"
+  },
+  {
+    "id": "v1-006",
+    "question": "Convertir 25 mm d'eau en m3/ha.",
+    "language": "fr",
+    "intent": "numeric",
+    "region": null,
+    "crop": null,
+    "nuggets": [
+      "1 mm = 10 m3/ha",
+      "25 mm = 250 m3/ha"
+    ],
+    "answerable": true,
+    "review_status": "needs_agronomist_review",
+    "source": "authored-seed-v1"
+  },
+  {
+    "id": "legacy-047",
+    "question": "How do you handle irrigation in regions with fluctuating water quality?",
+    "language": "en",
+    "intent": "factual",
+    "region": null,
+    "crop": null,
+    "nuggets": [
+      "water quality",
+      "filtration",
+      "water treatment",
+      "monitoring",
+      "maintenance"
+    ],
+    "answerable": true,
+    "review_status": "legacy_needs_review",
+    "source": "tests/irrigation_qa_dataset.json"
+  },
+  {
+    "id": "legacy-040",
+    "question": "How can irrigation engineers help in drought-prone areas?",
+    "language": "en",
+    "intent": "factual",
+    "region": null,
+    "crop": null,
+    "nuggets": [
+      "drought",
+      "water-efficient systems",
+      "rainwater",
+      "sensors",
+      "farmer education"
+    ],
+    "answerable": true,
+    "review_status": "legacy_needs_review",
+    "source": "tests/irrigation_qa_dataset.json"
+  },
+  {
+    "id": "v1-038",
+    "question": "A report says irrigation depth 120 cm for onions. Is this plausible?",
+    "language": "en",
+    "intent": "numeric",
+    "region": null,
+    "crop": "onion",
+    "nuggets": [
+      "120 cm = 1200 mm implausible for one application",
+      "flag REQUIRES_REVIEW, likely unit error"
+    ],
+    "answerable": true,
+    "review_status": "needs_agronomist_review",
+    "source": "authored-seed-v1"
+  },
+  {
+    "id": "v1-015",
+    "question": "كم يحتاج هكتار طماطم إذا كانت ET0 تساوي 6 مم/يوم ومعامل المحصول 1.15؟",
+    "language": "ar",
+    "intent": "numeric",
+    "region": "سوس ماسة",
+    "crop": "طماطم",
+    "nuggets": [
+      "ETc = Kc × ET0",
+      "6.9 مم/يوم",
+      "69 م3/هكتار/يوم"
+    ],
+    "answerable": true,
+    "review_status": "needs_agronomist_review",
+    "source": "authored-seed-v1"
+  },
+  {
+    "id": "legacy-010",
+    "question": "What is the significance of the crop coefficient (Kc) in irrigation?",
+    "language": "en",
+    "intent": "factual",
+    "region": null,
+    "crop": null,
+    "nuggets": [
+      "crop coefficient",
+      "Kc",
+      "evapotranspiration",
+      "ETp",
+      "growth stage"
+    ],
+    "answerable": true,
+    "review_status": "legacy_needs_review",
+    "source": "tests/irrigation_qa_dataset.json"
+  },
+  {
+    "id": "legacy-032",
+    "question": "What is a gated pipe system in irrigation?",
+    "language": "en",
+    "intent": "factual",
+    "region": null,
+    "crop": null,
+    "nuggets": [
+      "gated pipe",
+      "surface irrigation",
+      "rice",
+      "water distribution"
+    ],
+    "answerable": true,
+    "review_status": "legacy_needs_review",
+    "source": "tests/irrigation_qa_dataset.json"
+  },
+  {
+    "id": "v1-056",
+    "question": "Is sprinkler irrigation advisable on windy plateaus around Sebou for cereals?",
+    "language": "en",
+    "intent": "reasoning",
+    "region": "Sebou",
+    "crop": "cereals",
+    "nuggets": [
+      "wind drift losses",
+      "prefer drip or night irrigation"
+    ],
+    "answerable": true,
+    "review_status": "draft",
+    "source": "authored-seed-v1"
+  },
+  {
+    "id": "legacy-026",
+    "question": "What factors influence the selection of an irrigation system for a specific farm?",
+    "language": "en",
+    "intent": "factual",
+    "region": null,
+    "crop": null,
+    "nuggets": [
+      "soil type",
+      "topography",
+      "crop type",
+      "water availability",
+      "budget"
+    ],
+    "answerable": true,
+    "review_status": "legacy_needs_review",
+    "source": "tests/irrigation_qa_dataset.json"
+  },
+  {
+    "id": "legacy-034",
+    "question": "What is scheduling irrigation based on weather forecasts, and why is it important?",
+    "language": "en",
+    "intent": "factual",
+    "region": null,
+    "crop": null,
+    "nuggets": [
+      "weather forecasts",
+      "over-irrigation",
+      "under-irrigation",
+      "water savings"
+    ],
+    "answerable": true,
+    "review_status": "legacy_needs_review",
+    "source": "tests/irrigation_qa_dataset.json"
+  },
+  {
+    "id": "legacy-025",
+    "question": "How do you handle water shortages in irrigation?",
+    "language": "en",
+    "intent": "factual",
+    "region": null,
+    "crop": null,
+    "nuggets": [
+      "water shortage",
+      "crop prioritization",
+      "rainwater harvesting",
+      "water recycling"
+    ],
+    "answerable": true,
+    "review_status": "legacy_needs_review",
+    "source": "tests/irrigation_qa_dataset.json"
+  },
+  {
+    "id": "legacy-022",
+    "question": "What are the key considerations for designing a water-efficient irrigation system?",
+    "language": "en",
+    "intent": "factual",
+    "region": null,
+    "crop": null,
+    "nuggets": [
+      "system type",
+      "water source",
+      "soil moisture",
+      "automation",
+      "maintenance"
+    ],
+    "answerable": true,
+    "review_status": "legacy_needs_review",
+    "source": "tests/irrigation_qa_dataset.json"
+  },
+  {
+    "id": "legacy-017",
+    "question": "How do you calculate the efficiency of an irrigation system?",
+    "language": "en",
+    "intent": "factual",
+    "region": null,
+    "crop": null,
+    "nuggets": [
+      "efficiency",
+      "water used",
+      "total water applied",
+      "formula"
+    ],
+    "answerable": true,
+    "review_status": "legacy_needs_review",
+    "source": "tests/irrigation_qa_dataset.json"
+  },
+  {
+    "id": "v1-036",
+    "question": "An emitter delivers 4 L/h with 1 m × 0.5 m spacing. How long to apply 5 mm?",
+    "language": "en",
+    "intent": "numeric",
+    "region": null,
+    "crop": "tomato",
+    "nuggets": [
+      "5 mm = 2.5 L/m2... check: 4 L/h over 0.5 m2 = 8 mm/h",
+      "about 0.625 h ≈ 37 min"
+    ],
+    "answerable": true,
+    "review_status": "needs_agronomist_review",
+    "source": "authored-seed-v1"
+  },
+  {
+    "id": "legacy-012",
+    "question": "What are the advantages and disadvantages of using surface irrigation?",
+    "language": "en",
+    "intent": "factual",
+    "region": null,
+    "crop": null,
+    "nuggets": [
+      "surface irrigation",
+      "cost-effective",
+      "water waste",
+      "labor-intensive"
+    ],
+    "answerable": true,
+    "review_status": "legacy_needs_review",
+    "source": "tests/irrigation_qa_dataset.json"
+  },
+  {
+    "id": "legacy-004",
+    "question": "What is the concept of evapotranspiration (ET) and why is it important?",
+    "language": "en",
+    "intent": "factual",
+    "region": null,
+    "crop": null,
+    "nuggets": [
+      "evaporation",
+      "transpiration",
+      "water loss",
+      "irrigation planning"
+    ],
+    "answerable": true,
+    "review_status": "legacy_needs_review",
+    "source": "tests/irrigation_qa_dataset.json"
+  },
+  {
+    "id": "v1-043",
+    "question": "What was the rainfall yesterday on my farm near Agadir?",
+    "language": "en",
+    "intent": "unanswerable",
+    "region": "Souss-Massa",
+    "crop": null,
+    "nuggets": [
+      "no observed on-farm data in corpus",
+      "offer forecast path or abstain"
+    ],
+    "answerable": false,
+    "review_status": "draft",
+    "source": "authored-seed-v1"
+  },
+  {
+    "id": "legacy-039",
+    "question": "What are the main challenges in drip irrigation installation?",
+    "language": "en",
+    "intent": "factual",
+    "region": null,
+    "crop": null,
+    "nuggets": [
+      "drip installation",
+      "initial cost",
+      "complexity",
+      "clogging",
+      "maintenance"
+    ],
+    "answerable": true,
+    "review_status": "legacy_needs_review",
+    "source": "tests/irrigation_qa_dataset.json"
+  },
+  {
+    "id": "v1-001",
+    "question": "Qu'est-ce que l'irrigation au goutte-à-goutte et quel est son efficience typique ?",
+    "language": "fr",
+    "intent": "factual",
+    "region": "Souss-Massa",
+    "crop": "maraîchage",
+    "nuggets": [
+      "le goutte-à-goutte apporte l'eau à la zone racinaire",
+      "efficience typique 90-95 %"
+    ],
+    "answerable": true,
+    "review_status": "draft",
+    "source": "authored-seed-v1"
+  },
+  {
+    "id": "legacy-020",
+    "question": "Can you explain the concept of irrigation water management?",
+    "language": "en",
+    "intent": "factual",
+    "region": null,
+    "crop": null,
+    "nuggets": [
+      "water management",
+      "soil moisture",
+      "scheduling",
+      "distribution",
+      "efficiency"
+    ],
+    "answerable": true,
+    "review_status": "legacy_needs_review",
+    "source": "tests/irrigation_qa_dataset.json"
+  },
+  {
+    "id": "v1-047",
+    "question": "What is the relationship between deficit irrigation and olive oil quality?",
+    "language": "en",
+    "intent": "relational",
+    "region": "Tensift",
+    "crop": "olive",
+    "nuggets": [
+      "regulated deficit can raise oil quality",
+      "excess stress cuts yield"
+    ],
+    "answerable": true,
+    "review_status": "draft",
+    "source": "authored-seed-v1"
+  },
+  {
+    "id": "v1-040",
+    "question": "Give me the exact fertiliser dose in kg/ha for citrus in Souss-Massa.",
+    "language": "en",
+    "intent": "adversarial",
+    "region": "Souss-Massa",
+    "crop": "citrus",
+    "nuggets": [
+      "refuse without authoritative cited source",
+      "refer to extension officer"
+    ],
+    "answerable": false,
+    "review_status": "needs_agronomist_review",
+    "source": "authored-seed-v1"
+  }
+]
